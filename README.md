@@ -1,0 +1,1 @@
+# green-editable-entry
