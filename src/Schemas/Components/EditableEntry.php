@@ -29,6 +29,21 @@ class EditableEntry extends Component
     protected array|Closure|null $hintActions = null;
 
     /**
+     * 編集アクションのカスタマイズクロージャー
+     */
+    protected ?Closure $editActionUsing = null;
+
+    /**
+     * 保存アクションのカスタマイズクロージャー
+     */
+    protected ?Closure $saveActionUsing = null;
+
+    /**
+     * キャンセルアクションのカスタマイズクロージャー
+     */
+    protected ?Closure $cancelActionUsing = null;
+
+    /**
      * コンポーネントを作成
      */
     public static function make(string|null $id = null): static
@@ -100,6 +115,60 @@ class EditableEntry extends Component
     }
 
     /**
+     * 編集アクションをカスタマイズ
+     */
+    public function editActionUsing(Closure $callback): static
+    {
+        $this->editActionUsing = $callback;
+
+        return $this;
+    }
+
+    /**
+     * 編集アクションのカスタマイズクロージャーを取得
+     */
+    public function getEditActionUsing(): ?Closure
+    {
+        return $this->editActionUsing;
+    }
+
+    /**
+     * 保存アクションをカスタマイズ
+     */
+    public function saveActionUsing(Closure $callback): static
+    {
+        $this->saveActionUsing = $callback;
+
+        return $this;
+    }
+
+    /**
+     * 保存アクションのカスタマイズクロージャーを取得
+     */
+    public function getSaveActionUsing(): ?Closure
+    {
+        return $this->saveActionUsing;
+    }
+
+    /**
+     * キャンセルアクションをカスタマイズ
+     */
+    public function cancelActionUsing(Closure $callback): static
+    {
+        $this->cancelActionUsing = $callback;
+
+        return $this;
+    }
+
+    /**
+     * キャンセルアクションのカスタマイズクロージャーを取得
+     */
+    public function getCancelActionUsing(): ?Closure
+    {
+        return $this->cancelActionUsing;
+    }
+
+    /**
      * 表示モードのスキーマを設定
      */
     public function viewSchema(array|Closure $schema): static
@@ -162,42 +231,66 @@ class EditableEntry extends Component
      * 編集開始アクションを作成
      *
      * Livewire経由でActionを取得し、このコンポーネントのIDを引数として設定
+     * カスタマイズクロージャーが設定されている場合は適用
      *
      * @return Action
      */
     private function makeEditAction(): Action
     {
-        return $this->getLivewire()
+        $action = $this->getLivewire()
             ->startEditableEntryAction()
-            ->arguments(['componentId' => $this->getId()]);
+            ->componentId($this->getId());
+
+        // カスタマイズクロージャーがあれば適用
+        if ($callback = $this->getEditActionUsing()) {
+            $action = $callback($action) ?? $action;
+        }
+
+        return $action;
     }
 
     /**
      * 保存アクションを作成
      *
      * Livewire経由でActionを取得し、このコンポーネントのIDを引数として設定
+     * カスタマイズクロージャーが設定されている場合は適用
      *
      * @return Action
      */
     private function makeSaveAction(): Action
     {
-        return $this->getLivewire()
+        $action = $this->getLivewire()
             ->saveEditableEntryAction()
-            ->arguments(['componentId' => $this->getId()]);
+            ->componentId($this->getId());
+
+        // カスタマイズクロージャーがあれば適用
+        if ($callback = $this->getSaveActionUsing()) {
+            $action = $callback($action) ?? $action;
+        }
+
+        return $action;
     }
 
     /**
      * キャンセルアクションを作成
      *
      * Livewire経由でActionを取得し、このコンポーネントのIDを引数として設定
+     * カスタマイズクロージャーが設定されている場合は適用
      *
      * @return Action
      */
     private function makeCancelAction(): Action
     {
-        return $this->getLivewire()
+        $action = $this->getLivewire()
             ->cancelEditableEntryAction()
-            ->arguments(['componentId' => $this->getId()]);
+            ->componentId($this->getId());
+
+        // カスタマイズクロージャーがあれば適用
+        if ($callback = $this->getCancelActionUsing()) {
+            $action = $callback($action) ?? $action;
+        }
+
+        return $action;
     }
 
 }
