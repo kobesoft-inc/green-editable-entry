@@ -26,20 +26,11 @@ class CancelEditableEntryAction extends Action
         $this->size('xs');
 
         // 編集モード時のみ表示
-        $this->visible(fn() => $this->isEditing());
+        $this->visible(fn () => $this->isEditing());
 
         // キャンセル処理
         $this->action(function (): void {
-
             $livewire = $this->getLivewire();
-            $componentId = $this->getComponentId();
-
-            // 編集中のデータを破棄
-            if ($componentId) {
-                unset($livewire->editableEntryData[$componentId]);
-            }
-
-            // 編集モードを解除
             $livewire->editingComponentId = null;
         });
     }

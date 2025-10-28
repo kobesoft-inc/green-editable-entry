@@ -5,7 +5,11 @@ Filament の Infolist エントリーにインライン編集機能を提供す�
 ## 機能
 
 - **インライン編集**: 表示モードから直接エントリーを編集
+- **2つの編集モード**:
+  - `EditableEntry`: 個々のフィールドを編集
+  - `EditableSection`: セクション全体をまとめて編集
 - **シームレスな統合**: Filament の Infolist コンポーネントと完全に統合
+- **Section の機能を完全サポート**: heading, description, icon, collapsible などすべての Section 機能を利用可能
 - **アクションベースのアーキテクチャ**: 専用の Action クラスによる関心の分離
 - **アクションのカスタマイズ**: 編集、保存、キャンセルボタンの外観と動作を自由にカスタマイズ
 - **バリデーション対応**: Filament のフォームシステムを通じた完全なバリデーション
@@ -86,12 +90,111 @@ public static function infolist(Infolist $infolist): Infolist
 
 現在のモードに応じて、アクションボタン（編集、保存、キャンセル）が自動的にレンダリングされます。
 
+### 4. EditableSection の使用
+
+`EditableSection` は Filament の `Section` コンポーネントを拡張し、セクションのヘッダー部に編集ボタンを配置します。Section のすべての機能（heading, description, icon, collapsible など）を維持しながら、インライン編集機能を提供します。
+
+**重要**: EditableSection を使用する場合、必ず `->id()` でIDを指定してください。IDが指定されていない場合はエラーが発生します。
+
+```php
+use Green\EditableEntry\Schemas\Components\EditableSection;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Grid as FormGrid;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\Grid as InfolistGrid;
+
+public static function infolist(Infolist $infolist): Infolist
+{
+    return $infolist
+        ->schema([
+            EditableSection::make('基本情報')
+                ->id('basic_info')  // IDは必須
+                ->description('氏名やメールアドレスなどの基本情報')
+                ->icon('heroicon-o-user')
+                ->collapsible()
+                ->viewSchema([
+                    InfolistGrid::make(2)->schema([
+                        TextEntry::make('name')->label('氏名'),
+                        TextEntry::make('email')->label('メールアドレス'),
+                    ]),
+                ])
+                ->editSchema([
+                    FormGrid::make(2)->schema([
+                        TextInput::make('name')
+                            ->label('氏名')
+                            ->required(),
+                        TextInput::make('email')
+                            ->label('メールアドレス')
+                            ->email()
+                            ->required(),
+                    ]),
+                ]),
+
+            EditableSection::make('連絡先情報')
+                ->id('contact_info')  // IDは必須
+                ->icon('heroicon-o-phone')
+                ->viewSchema([
+                    TextEntry::make('phone')->label('電話番号'),
+                    TextEntry::make('address')->label('住所'),
+                ])
+                ->editSchema([
+                    TextInput::make('phone')->label('電話番号'),
+                    TextInput::make('address')->label('住所'),
+                ]),
+        ]);
+}
+```
+
+#### EditableSection と EditableEntry の違い
+
+- **EditableSection**: セクション全体が編集可能。ヘッダー部に編集ボタンを配置し、セクション全体のコンテンツが表示モードと編集モードで切り替わります。複数のフィールドをまとめて編集する場合に適しています。
+
+- **EditableEntry**: 個々のフィールドが編集可能。各フィールドごとに編集ボタンを配置し、細かい粒度での編集が可能です。
+
+#### 使い分けの例
+
+```php
+// 複数フィールドをまとめて編集（EditableSection を使用）
+EditableSection::make('個人情報')
+    ->id('personal_details')  // IDは必須
+    ->viewSchema([
+        InfolistGrid::make(2)->schema([
+            TextEntry::make('family_name'),
+            TextEntry::make('given_name'),
+            TextEntry::make('birthday'),
+            TextEntry::make('gender'),
+        ]),
+    ])
+    ->editSchema([
+        FormGrid::make(2)->schema([
+            TextInput::make('family_name'),
+            TextInput::make('given_name'),
+            DateInput::make('birthday'),
+            Select::make('gender')->options([...]),
+        ]),
+    ]),
+
+// 個別フィールドをそれぞれ編集（EditableEntry を使用）
+Section::make('個人情報')->schema([
+    EditableEntry::make('name')
+        ->viewSchema([TextEntry::make('name')])
+        ->editSchema([TextInput::make('name')]),
+
+    EditableEntry::make('birthday')
+        ->viewSchema([TextEntry::make('birthday')])
+        ->editSchema([DateInput::make('birthday')]),
+]),
+```
+
 ## アーキテクチャ
 
 ### コンポーネント
 
 - **EditableEntry**: 表示モードと編集モードを管理するメインのスキーマコンポーネント
+- **EditableSection**: Section を拡張した編集可能なセクションコンポーネント
 - **HasEditableEntry**: Livewire ページに編集機能を提供する Trait
+- **HasEditableEntryActions**: 編集、保存、キャンセルアクションを管理する Trait
+- **HasEditableEntrySchema**: viewSchema と editSchema の切り替えを管理する Trait
 - **StartEditableEntryAction**: 編集モードを開始するアクション
 - **SaveEditableEntryAction**: 変更を保存するアクション
 - **CancelEditableEntryAction**: 編集をキャンセルするアクション

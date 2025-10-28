@@ -4,6 +4,7 @@ namespace Green\EditableEntry\Schemas\Components\Concerns;
 
 use Closure;
 use Filament\Actions\Action;
+use Illuminate\Support\Facades\Log;
 
 /**
  * EditableEntry のアクション機能を提供する Trait
@@ -113,8 +114,6 @@ trait HasEditableEntryActions
 
     /**
      * 現在編集中かどうかを判定
-     *
-     * @return bool
      */
     public function isEditing(): bool
     {
@@ -125,41 +124,45 @@ trait HasEditableEntryActions
      * 編集開始アクションを作成
      *
      * Livewire経由でActionを取得し、このコンポーネントのIDを設定
-     *
-     * @return Action
      */
     private function makeEditAction(): Action
     {
+        $componentId = $this->getId();
+
+        \Illuminate\Support\Facades\Log::info('makeEditAction', [
+            'componentId' => $componentId,
+        ]);
+
         return $this->getLivewire()
-            ->startEditableEntryAction()
-            ->componentId($this->getId());
+            ->startEditableEntryAction($componentId)
+            ->componentId($componentId);
     }
 
     /**
      * 保存アクションを作成
      *
      * Livewire経由でActionを取得し、このコンポーネントのIDを設定
-     *
-     * @return Action
      */
     private function makeSaveAction(): Action
     {
+        $componentId = $this->getId();
+
         return $this->getLivewire()
-            ->saveEditableEntryAction()
-            ->componentId($this->getId());
+            ->saveEditableEntryAction($componentId)
+            ->componentId($componentId);
     }
 
     /**
      * キャンセルアクションを作成
      *
      * Livewire経由でActionを取得し、このコンポーネントのIDを設定
-     *
-     * @return Action
      */
     private function makeCancelAction(): Action
     {
+        $componentId = $this->getId();
+
         return $this->getLivewire()
-            ->cancelEditableEntryAction()
-            ->componentId($this->getId());
+            ->cancelEditableEntryAction($componentId)
+            ->componentId($componentId);
     }
 }

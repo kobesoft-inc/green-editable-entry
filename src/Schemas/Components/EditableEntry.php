@@ -33,7 +33,7 @@ class EditableEntry extends Component
     /**
      * コンポーネントを作成
      */
-    public static function make(string|null $id = null): static
+    public static function make(?string $id = null): static
     {
         $static = app(static::class);
         $static->configure();
@@ -53,7 +53,7 @@ class EditableEntry extends Component
         parent::setUp();
 
         // デフォルトのhintActionsを設定（Actionオブジェクトを使用）
-        $this->hintActions(fn() => $this->getEditableEntryActions());
+        $this->hintActions(fn () => $this->getEditableEntryActions());
     }
 
     /**
@@ -91,5 +91,4 @@ class EditableEntry extends Component
     {
         return $this->evaluate($this->hintActions) ?? [];
     }
-
 }

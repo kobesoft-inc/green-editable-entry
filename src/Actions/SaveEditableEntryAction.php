@@ -65,8 +65,8 @@ class SaveEditableEntryAction extends Action
             $editSchema->saveRelationships();
 
             // 編集状態をクリア
+            $editSchema->fill([]);
             $livewire->editingComponentId = null;
-            unset($livewire->editableEntryData[$componentId]);
 
             // 成功通知を表示
             Notification::make()

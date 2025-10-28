@@ -2,6 +2,7 @@
 
 namespace Green\EditableEntry\Concerns;
 
+use Filament\Schemas\Components\Component;
 use Green\EditableEntry\Actions\CancelEditableEntryAction;
 use Green\EditableEntry\Actions\SaveEditableEntryAction;
 use Green\EditableEntry\Actions\StartEditableEntryAction;
@@ -16,30 +17,21 @@ use Green\EditableEntry\Schemas\Components\EditableEntry;
 trait HasEditableEntry
 {
     /**
-     * 編集中のデータを保持する配列
-     * キー: コンポーネントID、値: 編集中のデータ配列
-     */
-    public array $editableEntryData = [];
-
-    /**
      * 現在編集中のコンポーネントID
      * 同時に複数のコンポーネントを編集できないため、単一の文字列で管理
      */
     public ?string $editingComponentId = null;
 
     /**
-     * 指定されたcomponentIdを持つEditableEntryコンポーネントを取得
-     *
-     * すべてのキャッシュ済みスキーマから検索します。
-     * 特定のスキーマ名（'infolist'など）に依存しないため、汎用的に使用できます。
+     * 指定されたcomponentIdを持つコンポーネントを取得
      *
      * @param string $componentId コンポーネントID
-     * @return EditableEntry|null 見つかったコンポーネント、なければnull
+     * @return Component|null 見つかったコンポーネント、なければnull
      */
-    public function getEditableEntry(string $componentId): ?EditableEntry
+    public function getEditableEntry(string $componentId): ?Component
     {
         foreach ($this->getCachedSchemas() as $schema) {
-            if ($c = $schema->getComponent(fn($c) => $c instanceof EditableEntry && $c->getId() === $componentId)) {
+            if ($c = $schema->getComponent(fn($c) => method_exists($c, 'getId') && $c->getId() === $componentId)) {
                 /** @var EditableEntry $c */
                 return $c;
             }
@@ -51,33 +43,36 @@ trait HasEditableEntry
     /**
      * 編集開始アクション
      *
+     * @param string $componentId コンポーネントIDをアクション名に含める
      * @return StartEditableEntryAction
      */
-    public function startEditableEntryAction(): StartEditableEntryAction
+    public function startEditableEntryAction(string $componentId): StartEditableEntryAction
     {
-        return StartEditableEntryAction::make()
+        return StartEditableEntryAction::make("startEditableEntry.$componentId")
             ->livewire($this);
     }
 
     /**
      * キャンセルアクション
      *
+     * @param string $componentId コンポーネントIDをアクション名に含める
      * @return CancelEditableEntryAction
      */
-    public function cancelEditableEntryAction(): CancelEditableEntryAction
+    public function cancelEditableEntryAction(string $componentId): CancelEditableEntryAction
     {
-        return CancelEditableEntryAction::make()
+        return CancelEditableEntryAction::make("cancelEditableEntry.$componentId")
             ->livewire($this);
     }
 
     /**
      * 保存アクション
      *
+     * @param string $componentId コンポーネントIDをアクション名に含める
      * @return SaveEditableEntryAction
      */
-    public function saveEditableEntryAction(): SaveEditableEntryAction
+    public function saveEditableEntryAction(string $componentId): SaveEditableEntryAction
     {
-        return SaveEditableEntryAction::make()
+        return SaveEditableEntryAction::make("saveEditableEntry.$componentId")
             ->livewire($this);
     }
 }

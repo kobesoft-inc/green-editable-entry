@@ -8,14 +8,18 @@ namespace Green\EditableEntry\Actions\Concerns;
 trait HasComponentId
 {
     /**
+     * このアクションが属するコンポーネントのID
+     */
+    protected ?string $componentId = null;
+
+    /**
      * コンポーネントIDを設定
      *
-     * @param string|null $componentId
-     * @return static
+     * Livewireのマウント時にcomponentIdを引数として渡すように設定
      */
     public function componentId(?string $componentId): static
     {
-        $this->arguments(['componentId' => $componentId]);
+        $this->componentId = $componentId;
 
         return $this;
     }
@@ -23,20 +27,19 @@ trait HasComponentId
     /**
      * コンポーネントIDを取得
      *
-     * @return string|null
+     * まずargumentsから取得を試み、なければプロパティから取得
      */
     public function getComponentId(): ?string
     {
-        return $this->getArguments()['componentId'];
+        return $this->componentId;
     }
 
     /**
      * 現在、編集中かを取得する
-     *
-     * @return bool
      */
     public function isEditing(): bool
     {
-        return $this->getLivewire()->editingComponentId === $this->getComponentId();
+        $componentId = $this->getComponentId();
+        return $componentId && $this->getLivewire()->editingComponentId === $componentId;
     }
 }
