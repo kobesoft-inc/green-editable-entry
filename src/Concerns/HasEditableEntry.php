@@ -39,12 +39,9 @@ trait HasEditableEntry
     public function getEditableEntry(string $componentId): ?EditableEntry
     {
         foreach ($this->getCachedSchemas() as $schema) {
-            $components = $schema->getFlatComponents(withHidden: true);
-
-            foreach ($components as $component) {
-                if ($component instanceof EditableEntry && $component->getId() === $componentId) {
-                    return $component;
-                }
+            if ($c = $schema->getComponent(fn($c) => $c instanceof EditableEntry && $c->getId() === $componentId)) {
+                /** @var EditableEntry $c */
+                return $c;
             }
         }
 

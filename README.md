@@ -7,6 +7,7 @@ Filament の Infolist エントリーにインライン編集機能を提供す�
 - **インライン編集**: 表示モードから直接エントリーを編集
 - **シームレスな統合**: Filament の Infolist コンポーネントと完全に統合
 - **アクションベースのアーキテクチャ**: 専用の Action クラスによる関心の分離
+- **アクションのカスタマイズ**: 編集、保存、キャンセルボタンの外観と動作を自由にカスタマイズ
 - **バリデーション対応**: Filament のフォームシステムを通じた完全なバリデーション
 - **リレーション対応**: 関連データ（Repeater など）の保存をサポート
 - **多言語対応**: 英語と日本語を標準サポート
@@ -125,7 +126,7 @@ public ?string $editingComponentId = null;  // 現在編集中のコンポーネ
 
 ### アクションのカスタマイズ
 
-アクションの外観や動作をカスタマイズできます：
+各アクション（編集、保存、キャンセル）の外観や動作をカスタマイズできます。クロージャーの `$action` パラメータを通じて、アクションの設定を変更します：
 
 ```php
 EditableEntry::make('name')
@@ -134,31 +135,67 @@ EditableEntry::make('name')
         TextInput::make('name')
             ->required()
     ])
-    ->editActionUsing(function (Action $action) {
-        return $action->color('primary');
+    ->configureEditAction(function (Action $action) {
+        $action
+            ->color('primary')
+            ->icon('heroicon-o-pencil-square')
+            ->label('カスタム編集');
     })
-    ->saveActionUsing(function (Action $action) {
-        return $action->icon('heroicon-o-check');
+    ->configureSaveAction(function (Action $action) {
+        $action
+            ->color('success')
+            ->icon('heroicon-o-check-circle')
+            ->requiresConfirmation();
+    })
+    ->configureCancelAction(function (Action $action) {
+        $action
+            ->color('gray')
+            ->label('戻る');
     });
 ```
+
+#### カスタマイズ可能な項目
+
+- `color()` - アクションの色（primary, success, danger, gray など）
+- `icon()` - Heroicon のアイコン
+- `label()` - ボタンのラベルテキスト
+- `size()` - ボタンのサイズ（xs, sm, md, lg）
+- `requiresConfirmation()` - 確認ダイアログを表示
+- その他、Filament Action の全メソッドが利用可能
 
 ### 複雑なフォーム
 
 編集スキーマは、リレーションを含むすべての Filament フォームコンポーネントをサポートします：
 
 ```php
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Repeater;
+use Filament\Infolists\Components\Grid as InfolistGrid;
+
 EditableEntry::make('details')
+    ->label('詳細情報')
     ->viewSchema([
-        // 表示モードのコンポーネント
+        InfolistGrid::make(2)->schema([
+            TextEntry::make('field1')->label('フィールド1'),
+            TextEntry::make('field2')->label('フィールド2'),
+        ]),
     ])
     ->editSchema([
         Grid::make(2)->schema([
-            TextInput::make('field1'),
-            Select::make('field2'),
-            Repeater::make('items')->schema([
-                TextInput::make('item_name'),
-            ]),
-        ])
+            TextInput::make('field1')
+                ->label('フィールド1')
+                ->required(),
+            Select::make('field2')
+                ->label('フィールド2')
+                ->options(['option1' => 'オプション1', 'option2' => 'オプション2']),
+            Repeater::make('items')
+                ->label('アイテム')
+                ->schema([
+                    TextInput::make('item_name')->label('アイテム名'),
+                ])
+                ->columnSpanFull(),
+        ]),
     ]);
 ```
 
