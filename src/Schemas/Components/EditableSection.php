@@ -30,4 +30,24 @@ class EditableSection extends Section
         // afterHeaderに編集可能アクションを追加
         $this->afterHeader(fn () => $this->getEditableEntryActions());
     }
+
+    /**
+     * すべてのアクションを配列で取得
+     *
+     * EditableSectionではボタンスタイルをデフォルトにする
+     */
+    public function getEditableEntryActions(): array
+    {
+        return [
+            $this->getEditAction()
+                ->button()
+                ->color('primary'),
+            $this->getSaveAction()
+                ->button()
+                ->color('primary'),
+            $this->getCancelAction()
+                ->button()
+                ->color('gray'),
+        ];
+    }
 }

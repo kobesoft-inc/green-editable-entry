@@ -16,24 +16,24 @@ trait HasEditableEntryActions
     /**
      * 編集アクションのカスタマイズクロージャー
      */
-    protected ?Closure $configureEditAction = null;
+    protected ?Closure $modifyEditActionUsing = null;
 
     /**
      * 保存アクションのカスタマイズクロージャー
      */
-    protected ?Closure $configureSaveAction = null;
+    protected ?Closure $modifySaveActionUsing = null;
 
     /**
      * キャンセルアクションのカスタマイズクロージャー
      */
-    protected ?Closure $configureCancelAction = null;
+    protected ?Closure $modifyCancelActionUsing = null;
 
     /**
      * 編集アクションをカスタマイズ
      */
-    public function configureEditAction(Closure $callback): static
+    public function editAction(?Closure $callback): static
     {
-        $this->configureEditAction = $callback;
+        $this->modifyEditActionUsing = $callback;
 
         return $this;
     }
@@ -41,9 +41,9 @@ trait HasEditableEntryActions
     /**
      * 保存アクションをカスタマイズ
      */
-    public function configureSaveAction(Closure $callback): static
+    public function saveAction(?Closure $callback): static
     {
-        $this->configureSaveAction = $callback;
+        $this->modifySaveActionUsing = $callback;
 
         return $this;
     }
@@ -51,9 +51,9 @@ trait HasEditableEntryActions
     /**
      * キャンセルアクションをカスタマイズ
      */
-    public function configureCancelAction(Closure $callback): static
+    public function cancelAction(?Closure $callback): static
     {
-        $this->configureCancelAction = $callback;
+        $this->modifyCancelActionUsing = $callback;
 
         return $this;
     }
@@ -65,8 +65,8 @@ trait HasEditableEntryActions
     {
         $action = $this->makeEditAction();
 
-        if ($this->configureEditAction) {
-            $this->evaluate($this->configureEditAction, ['action' => $action]);
+        if ($this->modifyEditActionUsing) {
+            $this->evaluate($this->modifyEditActionUsing, ['action' => $action]);
         }
 
         return $action;
@@ -79,8 +79,8 @@ trait HasEditableEntryActions
     {
         $action = $this->makeSaveAction();
 
-        if ($this->configureSaveAction) {
-            $this->evaluate($this->configureSaveAction, ['action' => $action]);
+        if ($this->modifySaveActionUsing) {
+            $this->evaluate($this->modifySaveActionUsing, ['action' => $action]);
         }
 
         return $action;
@@ -93,8 +93,8 @@ trait HasEditableEntryActions
     {
         $action = $this->makeCancelAction();
 
-        if ($this->configureCancelAction) {
-            $this->evaluate($this->configureCancelAction, ['action' => $action]);
+        if ($this->modifyCancelActionUsing) {
+            $this->evaluate($this->modifyCancelActionUsing, ['action' => $action]);
         }
 
         return $action;
@@ -128,10 +128,6 @@ trait HasEditableEntryActions
     private function makeEditAction(): Action
     {
         $componentId = $this->getId();
-
-        \Illuminate\Support\Facades\Log::info('makeEditAction', [
-            'componentId' => $componentId,
-        ]);
 
         return $this->getLivewire()
             ->startEditableEntryAction($componentId)
