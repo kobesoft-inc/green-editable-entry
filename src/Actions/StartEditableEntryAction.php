@@ -5,7 +5,6 @@ namespace Green\EditableEntry\Actions;
 use Filament\Actions\Action;
 use Filament\Schemas\Schema;
 use Green\EditableEntry\Actions\Concerns\HasComponentId;
-use Illuminate\Support\Facades\Log;
 
 /**
  * 編集モードを開始するアクション
@@ -33,7 +32,6 @@ class StartEditableEntryAction extends Action
 
         // 編集モード開始処理
         $this->action(function (): void {
-
             $livewire = $this->getLivewire();
             $componentId = $this->getComponentId();
 

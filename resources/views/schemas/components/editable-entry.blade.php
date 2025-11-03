@@ -1,25 +1,26 @@
-<div wire:key="editable-{{ $getId() }}">
-    {{-- ラベルとhintActions --}}
+<div
+    {{
+        $attributes
+            ->merge([
+                'id' => $getId(),
+                'wire:key' => 'editable-' . $getId(),
+            ], escape: false)
+            ->merge($getExtraAttributes(), escape: false)
+            ->class(['fi-sc-editable-entry'])
+    }}
+>
     @if($getLabel())
         <div class="fi-sc-section-label-ctn">
             <div class="fi-sc-section-label">
                 {{ $getLabel() }}
             </div>
-
-            @php($hintActions = $getHintActions())
-            @if(count($hintActions) > 0)
+            @if($actionsSchema = $getChildSchema('actions'))
                 <div class="fi-sc-flex fi-vertical-align-center">
-                    @foreach($hintActions as $hintAction)
-                        @if($hintAction->isVisible())
-                            {{ $hintAction }}
-                        @endif
-                    @endforeach
+                    {{ $actionsSchema }}
                 </div>
             @endif
         </div>
     @endif
-
-    {{-- コンテンツ --}}
     <div class="fi-sc-editable-content">
         {{ $getChildSchema() }}
     </div>

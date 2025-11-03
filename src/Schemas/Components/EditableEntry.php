@@ -52,7 +52,10 @@ class EditableEntry extends Component
     {
         parent::setUp();
 
-        // デフォルトのhintActionsを設定（Actionオブジェクトを使用）
+        // アクションを子スキーマとして追加（Filamentのアクションシステムと統合）
+        $this->childComponents(fn () => $this->getEditableEntryActions(), 'actions');
+
+        // デフォルトのhintActionsも設定（後方互換性のため）
         $this->hintActions(fn () => $this->getEditableEntryActions());
     }
 
